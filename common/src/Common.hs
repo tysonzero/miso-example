@@ -1,7 +1,7 @@
 {-# LANGUAGE DataKinds, OverloadedStrings, TypeApplications, TypeOperators #-}
 
 module Common
-    ( Action(AddOne, ChangeURI, GetFoo, HandleURI, NoOp, SetFoo, SubtractOne)
+    ( Action(AddOne, ChangeURI, HandleURI, NoOp, SetFoo, SubtractOne, Sync)
     , Foo(Foo), Routes, State(HomePage, FooPage), fooURI, homeURI, mainView, routeApp
     ) where
 
@@ -13,12 +13,12 @@ import Servant.Utils.Links (URI, linkURI, safeLink)
 
 -- Routing
 
-routeApp :: URI -> (State, Action)
+routeApp :: URI -> State
 routeApp u = case route (Proxy @Routes) viewTree u of
-    Left _ -> (Error404Page, NoOp)
+    Left _ -> Error404Page
     Right x -> x
   where
-    viewTree = (HomePage 0, NoOp) :<|> (\fooId -> (FooPage Nothing, GetFoo fooId))
+    viewTree = HomePage 0 :<|> FooPage . Left
 
 -- Views
 
@@ -35,9 +35,9 @@ homeView fooId = div_ []
     , button_ [ onClick . ChangeURI $ fooURI fooId ] [ text "go" ]
     ]
 
-fooView :: Maybe Foo -> View Action
-fooView Nothing = div_ [] []
-fooView (Just (Foo fooStr)) = div_ []
+fooView :: Either Int Foo -> View Action
+fooView (Left _) = div_ [] []
+fooView (Right (Foo fooStr)) = div_ []
     [ button_ [ onClick $ ChangeURI homeURI ] [ text "back" ]
     , text $ toMisoString fooStr
     ]
@@ -61,16 +61,16 @@ fooURI = linkURI . safeLink (Proxy @Routes) (Proxy @FooRoute)
 
 -- State / Action
 
-data State = HomePage Int | FooPage (Maybe Foo) | Error404Page
+data State = HomePage Int | FooPage (Either Int Foo) | Error404Page
     deriving Eq
 
 data Action
     = NoOp
     | ChangeURI URI
     | HandleURI URI
+    | Sync
     | AddOne
     | SubtractOne
-    | GetFoo Int
     | SetFoo Foo
 
 newtype Foo = Foo String

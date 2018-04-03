@@ -27,7 +27,7 @@ app = serve (Proxy @ServerAPI) (staticHandler :<|> serverHandlers)
     staticHandler = serveDirectoryWebApp "static"
     serverHandlers = go homeURI :<|> go . fooURI
       where
-        go u = pure . HtmlPage . mainView . fst $ routeApp u
+        go u = pure . HtmlPage . mainView $ routeApp u
 
 type ServerAPI = StaticAPI :<|> ServerRoutes
 

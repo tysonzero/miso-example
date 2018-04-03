@@ -9,11 +9,11 @@ import Common
 
 main :: IO ()
 main = miso $ \uri -> do
-    let (state, action) = routeApp uri
+    let state = routeApp uri
     App { model = state
         , update = handler
         , view = mainView
-        , initialAction = action
+        , initialAction = Sync
         , events = defaultEvents
         , mountPoint = Nothing
         , subs = [uriSub HandleURI]
@@ -24,10 +24,10 @@ handler NoOp m = noEff m
 handler (ChangeURI u) m = m <# do
     pushURI u
     pure NoOp
-handler (HandleURI u) _ = let (state, action) = routeApp u in state <# pure action
+handler (HandleURI u) _ = let state = routeApp u in state <# pure Sync
+handler Sync m@(FooPage (Left fooId)) = m <# do
+    pure . SetFoo . Foo $ "Foo Number " ++ show fooId
 handler AddOne (HomePage fooId) = noEff . HomePage $ fooId + 1
 handler SubtractOne (HomePage fooId) = noEff . HomePage $ fooId - 1
-handler (GetFoo fooId) m = m <# do
-    pure . SetFoo . Foo $ "Foo Number " ++ show fooId
-handler (SetFoo foo) (FooPage _) = noEff $ FooPage (Just foo)
+handler (SetFoo foo) (FooPage _) = noEff $ FooPage (Right foo)
 handler _ m = noEff m
