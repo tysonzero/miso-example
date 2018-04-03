@@ -1,0 +1,14 @@
+name:                common
+version:             0.0.0.0
+build-type:          Simple
+cabal-version:       >=1.10
+
+library
+  hs-source-dirs:      src
+  ghc-options:         -O2 -Wall
+  default-language:    Haskell2010
+  build-depends:       base ==4.9.*
+                     , containers >=0.5.7 && <0.6
+                     , miso ==0.17.*
+                     , servant ==0.11.*
+  exposed-modules:     Common

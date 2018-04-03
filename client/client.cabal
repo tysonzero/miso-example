@@ -1,0 +1,13 @@
+name:                client
+version:             0.0.0.0
+build-type:          Simple
+cabal-version:       >=1.10
+
+executable client
+  hs-source-dirs:      src
+  main-is:             Main.hs
+  ghc-options:         -O2 -Wall
+  default-language:    Haskell2010
+  build-depends:       base ==4.9.*
+                     , common ==0.0.0.*
+                     , miso ==0.17.*
