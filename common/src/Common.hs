@@ -1,12 +1,13 @@
 {-# LANGUAGE DataKinds, OverloadedStrings, TypeApplications, TypeOperators #-}
 
 module Common
-    ( Action(ChangeURI, GetFoo, HandleURI, NoOp, SetFoo), Foo(Foo), Routes, State(FooPage)
-    , fooURI, homeURI, mainView, routeApp
+    ( Action(AddOne, ChangeURI, GetFoo, HandleURI, NoOp, SetFoo, SubtractOne)
+    , Foo(Foo), Routes, State(HomePage, FooPage), fooURI, homeURI, mainView, routeApp
     ) where
 
 import Data.Proxy (Proxy(Proxy))
-import Miso (View, div_, route, text)
+import Miso (View, button_, div_, onClick, route, text)
+import Miso.String (toMisoString)
 import Servant.API (Capture, (:<|>)((:<|>)), (:>))
 import Servant.Utils.Links (URI, linkURI, safeLink)
 
@@ -17,22 +18,31 @@ routeApp u = case route (Proxy @Routes) viewTree u of
     Left _ -> (Error404Page, NoOp)
     Right x -> x
   where
-    viewTree = (HomePage, NoOp) :<|> (\fooId -> (FooPage Nothing, GetFoo fooId))
+    viewTree = (HomePage 0, NoOp) :<|> (\fooId -> (FooPage Nothing, GetFoo fooId))
 
 -- Views
 
-mainView :: State -> View a
-mainView HomePage = homeView
+mainView :: State -> View Action
+mainView (HomePage fooId) = homeView fooId
 mainView (FooPage mfoo) = fooView mfoo
 mainView Error404Page = error404View
 
-homeView :: View a
-homeView = div_ [] []
+homeView :: Int -> View Action
+homeView fooId = div_ []
+    [ button_ [ onClick SubtractOne ] [ text "-" ]
+    , text . toMisoString $ show fooId
+    , button_ [ onClick AddOne ] [ text "+" ]
+    , button_ [ onClick . ChangeURI $ fooURI fooId ] [ text "go" ]
+    ]
 
-fooView :: Maybe Foo -> View a
-fooView _ = div_ [] []
+fooView :: Maybe Foo -> View Action
+fooView Nothing = div_ [] []
+fooView (Just (Foo fooStr)) = div_ []
+    [ button_ [ onClick $ ChangeURI homeURI ] [ text "back" ]
+    , text $ toMisoString fooStr
+    ]
 
-error404View :: View a
+error404View :: View Action
 error404View = text "404 not found"
 
 -- Routes / URIs
@@ -51,13 +61,15 @@ fooURI = linkURI . safeLink (Proxy @Routes) (Proxy @FooRoute)
 
 -- State / Action
 
-data State = HomePage | FooPage (Maybe Foo) | Error404Page
+data State = HomePage Int | FooPage (Maybe Foo) | Error404Page
     deriving Eq
 
 data Action
     = NoOp
     | ChangeURI URI
     | HandleURI URI
+    | AddOne
+    | SubtractOne
     | GetFoo Int
     | SetFoo Foo
 
