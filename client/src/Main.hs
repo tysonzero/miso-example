@@ -1,9 +1,13 @@
+{-# LANGUAGE TypeApplications #-}
+
 module Main (main) where
 
+import Data.Proxy (Proxy(Proxy))
 import Miso
     ( App(App), defaultEvents, Effect, events, initialAction, miso
-    , model, mountPoint, noEff, pushURI, subs, update, uriSub, view, (<#)
+    , model, mountPoint, noEff, pushURI, route, subs, update, uriSub, view, (<#)
     )
+import Servant.Utils.Links (URI)
 
 import Common
 
@@ -31,3 +35,8 @@ handler AddOne (HomePage fooId) = noEff . HomePage $ fooId + 1
 handler SubtractOne (HomePage fooId) = noEff . HomePage $ fooId - 1
 handler (SetFoo foo) (FooPage _) = noEff $ FooPage (Right foo)
 handler _ m = noEff m
+
+routeApp :: URI -> State
+routeApp u = case route (Proxy @Routes) handlers u of
+    Left _ -> Error404Page
+    Right x -> x

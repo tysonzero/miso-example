@@ -6,10 +6,12 @@ import Data.Proxy (Proxy(Proxy))
 import Lucid
     ( ToHtml, body_, charset_, doctypehtml_, head_, meta_, script_, src_, toHtml, toHtmlRaw, title_
     )
-import Miso (ToServerRoutes)
+import Miso (View)
+import Miso.TypeLevel (MapApi, MapHandlers, mapHandlers)
 import Network.Wai.Handler.Warp (run)
 import Network.Wai.Middleware.RequestLogger (logStdout)
-import Servant (Application, Raw, serve, serveDirectoryWebApp, (:<|>)((:<|>)), (:>))
+import Servant (Application, Get, Handler, Raw, serve, serveDirectoryWebApp, (:<|>)((:<|>)), (:>))
+import Servant.HTML.Lucid (HTML)
 import System.Environment (getArgs)
 import Text.Read (readMaybe)
 
@@ -25,15 +27,17 @@ app :: Application
 app = serve (Proxy @ServerAPI) (staticHandler :<|> serverHandlers)
   where
     staticHandler = serveDirectoryWebApp "static"
-    serverHandlers = go homeURI :<|> go . fooURI
-      where
-        go u = pure . HtmlPage . mainView $ routeApp u
 
 type ServerAPI = StaticAPI :<|> ServerRoutes
 
 type StaticAPI = "static" :> Raw
 
-type ServerRoutes = ToServerRoutes Routes HtmlPage Action
+type ServerRoutes = MapApi (Get '[HTML] (HtmlPage (View Action))) Routes
+
+serverHandlers :: MapHandlers (Handler (HtmlPage (View Action))) Routes
+serverHandlers = mapHandlers (Proxy @Routes) go handlers
+  where
+    go = pure . HtmlPage . mainView
 
 newtype HtmlPage a = HtmlPage a
 

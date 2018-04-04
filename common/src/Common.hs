@@ -2,23 +2,20 @@
 
 module Common
     ( Action(AddOne, ChangeURI, HandleURI, NoOp, SetFoo, SubtractOne, Sync)
-    , Foo(Foo), Routes, State(HomePage, FooPage), fooURI, homeURI, mainView, routeApp
+    , Foo(Foo), Routes, State(Error404Page, HomePage, FooPage), fooURI, handlers, homeURI, mainView
     ) where
 
 import Data.Proxy (Proxy(Proxy))
-import Miso (View, button_, div_, onClick, route, text)
+import Miso (View, button_, div_, onClick, text)
 import Miso.String (toMisoString)
+import Miso.TypeLevel (MapHandlers)
 import Servant.API (Capture, (:<|>)((:<|>)), (:>))
 import Servant.Utils.Links (URI, linkURI, safeLink)
 
 -- Routing
 
-routeApp :: URI -> State
-routeApp u = case route (Proxy @Routes) viewTree u of
-    Left _ -> Error404Page
-    Right x -> x
-  where
-    viewTree = HomePage 0 :<|> FooPage . Left
+handlers :: MapHandlers State Routes
+handlers = HomePage 0 :<|> FooPage . Left
 
 -- Views
 

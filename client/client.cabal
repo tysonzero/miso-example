@@ -11,3 +11,4 @@ executable client
   build-depends:       base ==4.9.*
                      , common ==0.0.0.*
                      , miso ==0.17.*
+                     , servant ==0.11.*
