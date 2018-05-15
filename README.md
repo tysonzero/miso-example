@@ -12,7 +12,7 @@ Incremental build
 
 * `mkdir -p static`
 
-* `ln -s dist-ghcjs/build/<path-to-client-javascript> static/all.js`
+* `ln -s ../dist-ghcjs/build/<path-to-client-javascript> static/all.js`
 
 Standard build
 --------------
@@ -23,7 +23,7 @@ Standard build
 
 * `mkdir -p static`
 
-* `ln -s result/ghcjs/client/bin/client.jsexe/all.js static/all.js`
+* `ln -s ../result/ghcjs/client/bin/client.jsexe/all.js static/all.js`
 
 Run
 ---
