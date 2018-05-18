@@ -12,6 +12,10 @@ First time:
 
 * In tab 2: `nix-shell -A shells.ghcjs`
 
+* In tab 1: `cabal new-build all`
+
+* In tab 2: `cabal --project-file=cabal-ghcjs.project --builddir=dist-ghcjs new-build all`
+
 * `ln -s dist-newstyle/build/<path-to-server-binary> miso-example`
 
 * `mkdir -p static`
