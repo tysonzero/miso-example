@@ -2,23 +2,21 @@
 
 module Common
     ( Action(AddOne, ChangeURI, GetFoo, HandleURI, NoOp, SetFoo, SubtractOne)
-    , Foo(Foo), Routes, State(HomePage, FooPage), fooURI, homeURI, mainView, routeApp
+    , Foo(Foo), Routes, State(Error404Page, HomePage, FooPage), fooURI, homeURI, mainView, routes
     ) where
 
 import Data.Proxy (Proxy(Proxy))
-import Miso (View, button_, div_, onClick, route, text)
+import Lucid (Html)
+import Miso (RouteT, View, button_, div_, onClick, route, text)
 import Miso.String (toMisoString)
-import Servant.API (Capture, (:<|>)((:<|>)), (:>))
+import Servant.API (Capture, Get, Raw, (:<|>)((:<|>)), (:>))
+import Servant.HTML.Lucid (HTML)
 import Servant.Utils.Links (URI, linkURI, safeLink)
 
 -- Routing
 
-routeApp :: URI -> (State, Action)
-routeApp u = case route (Proxy @Routes) viewTree u of
-    Left _ -> (Error404Page, NoOp)
-    Right x -> x
-  where
-    viewTree = (HomePage 0, NoOp) :<|> (\fooId -> (FooPage Nothing, GetFoo fooId))
+routes :: ((State, Action) -> a) -> RouteT Routes a
+routes f = f (HomePage 0, NoOp) :<|> (\fooId -> f (FooPage Nothing, GetFoo fooId))
 
 -- Views
 
@@ -50,8 +48,10 @@ error404View = text "404 not found"
 type Routes = HomeRoute
          :<|> FooRoute
 
-type HomeRoute = View Action
-type FooRoute = "foo" :> Capture "id" Int :> View Action
+type HomeRoute = Endpoint
+type FooRoute = "foo" :> Capture "id" Int :> Endpoint
+
+type Endpoint = Get '[HTML] (Html ())
 
 homeURI :: URI
 homeURI = linkURI $ safeLink (Proxy @Routes) (Proxy @HomeRoute)

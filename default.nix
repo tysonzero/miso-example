@@ -3,8 +3,8 @@
     miso = pkgs.haskell.lib.addBuildDepend (self.callCabal2nix "miso" (pkgs.fetchFromGitHub {
       owner = "tysonzero";
       repo = "miso";
-      rev = "b36ceabbf3348ac4f4ec38b947f824084836adac";
-      sha256 = "1mq3xcwp95pfnz462234nvxwm9g1h7xxrxfwycqgcgs8dxifs2iy";
+      rev = "bce8ffa8e56a99a84ebed360780d9fdc8f4d0822";
+      sha256 = "1p17rk5nd1j2p0givqxyd330h4gswkgiqyn6hn7153i4s5m6a4mg";
     }) {}) self.ghcjs-base;
   };
 

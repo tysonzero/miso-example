@@ -1,8 +1,11 @@
+{-# LANGUAGE TypeApplications #-}
+
 module Main (main) where
 
+import Data.Proxy (Proxy(Proxy))
 import Miso
-    ( App(App), defaultEvents, Effect, events, initialAction, miso
-    , model, mountPoint, noEff, pushURI, subs, update, uriSub, view, (<#)
+    ( App(App), URI, defaultEvents, Effect, events, initialAction, miso
+    , model, mountPoint, noEff, pushURI, route, subs, update, uriSub, view, (<#)
     )
 
 import Common
@@ -31,3 +34,8 @@ handler (GetFoo fooId) m = m <# do
     pure . SetFoo . Foo $ "Foo Number " ++ show fooId
 handler (SetFoo foo) (FooPage _) = noEff $ FooPage (Just foo)
 handler _ m = noEff m
+
+routeApp :: URI -> (State, Action)
+routeApp u = case route (Proxy @Routes) (routes id) u of
+    Left _ -> (Error404Page, NoOp)
+    Right x -> x
