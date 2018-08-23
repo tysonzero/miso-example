@@ -7,11 +7,13 @@ module Common
 
 import Data.Proxy (Proxy(Proxy))
 import Lucid (Html)
-import Miso (RouteT, View, button_, div_, onClick, route, text)
+import Miso (RouteT, View, button_, div_, input_, label_, onChecked, onClick, text, type_)
 import Miso.String (toMisoString)
-import Servant.API (Capture, Get, Raw, (:<|>)((:<|>)), (:>))
+import Servant.API (Capture, Get, (:<|>)((:<|>)), (:>))
 import Servant.HTML.Lucid (HTML)
 import Servant.Utils.Links (URI, linkURI, safeLink)
+
+import Debug.Trace
 
 -- Routing
 
@@ -31,6 +33,12 @@ homeView fooId = div_ []
     , text . toMisoString $ show fooId
     , button_ [ onClick AddOne ] [ text "+" ]
     , button_ [ onClick . ChangeURI $ fooURI fooId ] [ text "go" ]
+    , label_ []
+        [ input_
+            [ type_ "checkbox"
+            , onChecked $ \x -> x `traceShow` AddOne
+            ]
+        ]
     ]
 
 fooView :: Maybe Foo -> View Action
